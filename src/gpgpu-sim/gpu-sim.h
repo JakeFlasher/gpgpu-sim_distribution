@@ -32,6 +32,7 @@
 #ifndef GPU_SIM_H
 #define GPU_SIM_H
 
+#include <cstdint>
 #include <stdio.h>
 #include <fstream>
 #include <iostream>
