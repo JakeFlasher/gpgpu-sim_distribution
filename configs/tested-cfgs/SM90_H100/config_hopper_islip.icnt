@@ -7,7 +7,7 @@ network_count = 2;
 
 // Topology
 topology = fly;
-k = 144;
+k = 292;
 n = 1;
 
 // Routing
@@ -71,4 +71,3 @@ read_reply_begin_vc = 0;
 read_reply_end_vc = 0;
 write_reply_begin_vc = 0;
 write_reply_end_vc = 0;
-
