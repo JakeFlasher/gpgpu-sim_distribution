@@ -202,6 +202,9 @@ unsigned memory_stats_t::memlatstat_done(mem_fetch *mf) {
   return mf_latency;
 }
 
+/*
+Memory Latency Statistics.
+*/
 void memory_stats_t::memlatstat_read_done(mem_fetch *mf) {
   if (m_memory_config->SST_mode) {
     // in SST mode, we just calculate mem latency
