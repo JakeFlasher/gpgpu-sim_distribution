@@ -149,6 +149,7 @@ cudaLaunchDeviceV2_init_perWarp, cudaLaunchDevicV2_perKernel>"
 void gpgpu_t::gpgpu_ptx_sim_bindNameToTexture(
     const char *name, const struct textureReference *texref, int dim,
     int readmode, int ext) {
+#if (CUDART_VERSION <= 1200)
   std::string texname(name);
   if (m_NameToTextureRef.find(texname) == m_NameToTextureRef.end()) {
     m_NameToTextureRef[texname] = std::set<const struct textureReference *>();
@@ -172,6 +173,7 @@ void gpgpu_t::gpgpu_ptx_sim_bindNameToTexture(
   const textureReferenceAttr *texAttr = new textureReferenceAttr(
       texref, dim, (enum cudaTextureReadMode)readmode, ext);
   m_NameToAttribute[texname] = texAttr;
+#endif
 }
 
 const char *gpgpu_t::gpgpu_ptx_sim_findNamefromTexture(
@@ -216,6 +218,7 @@ texel_size_numbits放入textureInfo中，将textureInfo放入m_NameToTextureInfo
 */
 void gpgpu_t::gpgpu_ptx_sim_bindTextureToArray(
     const struct textureReference *texref, const struct cudaArray *array) {
+#if (CUDART_VERSION <= 1200)
   std::string texname = gpgpu_ptx_sim_findNamefromTexture(texref);
 
   std::map<std::string, const struct cudaArray *>::const_iterator t =
@@ -289,14 +292,17 @@ void gpgpu_t::gpgpu_ptx_sim_bindTextureToArray(
   texInfo->texel_size = texel_size;
   texInfo->texel_size_numbits = intLOGB2(texel_size);
   m_NameToTextureInfo[texname] = texInfo;
+#endif
 }
 
 void gpgpu_t::gpgpu_ptx_sim_unbindTexture(
     const struct textureReference *texref) {
+#if (CUDART_VERSION <= 1200)
   // assumes bind-use-unbind-bind-use-unbind pattern
   std::string texname = gpgpu_ptx_sim_findNamefromTexture(texref);
   m_NameToCudaArray.erase(texname);
   m_NameToTextureInfo.erase(texname);
+#endif
 }
 
 //定义指令最大占用8字节大小==64 bit。
