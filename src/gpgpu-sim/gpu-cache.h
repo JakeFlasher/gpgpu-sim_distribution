@@ -948,6 +948,10 @@ class tag_array {
   // Use this constructor
   tag_array(cache_config &config, int core_id, int type_id);
   ~tag_array();
+// Add to the tag_array class declaration, around line 280-290:
+// To compute the number of DRAM accesses, we need to know if we're working with the LLC or not
+static void toggle_LLC();
+static bool is_LLC();
 
   enum cache_request_status probe(new_addr_type addr, unsigned &idx,
                                   mem_fetch *mf, bool is_write,

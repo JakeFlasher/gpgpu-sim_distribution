@@ -1235,6 +1235,13 @@ void gpgpu_sim::init() {
 }
 
 void gpgpu_sim::update_stats() {
+  // Calculate transient IPC before counters are reset
+  if (gpu_sim_cycle > 0) {
+    float transient_ipc = (float)gpu_sim_insn / gpu_sim_cycle;
+    std::cerr << "[TRANSIENT_IPC]: " << transient_ipc 
+              << " (inst: " << gpu_sim_insn 
+              << ", cycles: " << gpu_sim_cycle << ")" << std::endl;
+  }
   m_memory_stats->memlatstat_lat_pw();
   gpu_tot_sim_cycle += gpu_sim_cycle;
   gpu_tot_sim_insn += gpu_sim_insn;
@@ -2092,7 +2099,30 @@ void gpgpu_sim::cycle() {
       raise(SIGTRAP);  // Debug breakpoint
     }
     gpu_sim_cycle++;
-
+    // Add periodic IPC reporting - using a 5000 cycle interval
+    // You can adjust this interval based on your needs
+    if (!(gpu_sim_cycle % 100)) {
+      unsigned long long current_insn = gpu_sim_insn;
+      static unsigned long long last_insn = 0;
+      static unsigned long long last_cycle = 0;
+      
+      // Calculate IPC for this interval
+      unsigned long long cycle_interval = gpu_sim_cycle - last_cycle;
+      unsigned long long insn_interval = current_insn - last_insn;
+      
+      if (cycle_interval > 0) {
+        float transient_ipc = (float)insn_interval / cycle_interval;
+        std::cerr << "[TRANSIENT_IPC]: " << transient_ipc 
+                  << " (inst: " << insn_interval 
+                  << ", cycles: " << cycle_interval 
+                  << ", total_cycle: " << gpu_sim_cycle 
+                  << ")" << std::endl;
+      }
+      
+      // Update last values for next interval
+      last_insn = current_insn;
+      last_cycle = gpu_sim_cycle;
+    }
     if (g_interactive_debugger_enabled) gpgpu_debug();
 
       // McPAT main cycle (interface with McPAT)
@@ -2340,6 +2370,30 @@ void sst_gpgpu_sim::SST_cycle() {
     asm("int $03");
   }
   gpu_sim_cycle++;
+    // Add periodic IPC reporting - using a 5000 cycle interval
+    // You can adjust this interval based on your needs
+    if (!(gpu_sim_cycle % 100) && false) {
+      unsigned long long current_insn = gpu_sim_insn;
+      static unsigned long long last_insn = 0;
+      static unsigned long long last_cycle = 0;
+      
+      // Calculate IPC for this interval
+      unsigned long long cycle_interval = gpu_sim_cycle - last_cycle;
+      unsigned long long insn_interval = current_insn - last_insn;
+      
+      if (cycle_interval > 0) {
+        float transient_ipc = (float)insn_interval / cycle_interval;
+        std::cout << "[TRANSIENT_IPC]: " << transient_ipc 
+                  << " (inst: " << insn_interval 
+                  << ", cycles: " << cycle_interval 
+                  << ", total_cycle: " << gpu_sim_cycle 
+                  << ")" << std::endl;
+      }
+      
+      // Update last values for next interval
+      last_insn = current_insn;
+      last_cycle = gpu_sim_cycle;
+    }
   if (g_interactive_debugger_enabled) gpgpu_debug();
 
     // McPAT main cycle (interface with McPAT)

@@ -227,6 +227,13 @@ void tag_array::add_pending_line(mem_fetch *mf) {
   }
 }
 
+// Add after tag_array::remove_pending_line implementation, around line 233:
+
+// global flag to indicate whether or not we're checking from the LLC 
+static bool is_llc = false;
+void tag_array::toggle_LLC() { is_llc = !is_llc; }
+bool tag_array::is_LLC() { return is_llc; }
+
 void tag_array::remove_pending_line(mem_fetch *mf) {
   assert(mf);
   new_addr_type addr = m_config.block_addr(mf->get_addr());
@@ -329,6 +336,10 @@ enum cache_request_status tag_array::probe(new_addr_type addr, unsigned &idx,
     abort();  // if an unreserved block exists, it is either invalid or
               // replaceable
 
+  // Add just before returning MISS in tag_array::probe, around line 287:
+
+  // If the request came from the LLC, log the memory request
+  if(is_llc) std::cout << "[COLD_START_DRAM_REQ]: " << addr << "\n";
   return MISS;
 }
 
